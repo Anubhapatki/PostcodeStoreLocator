@@ -1,0 +1,15 @@
+<html>
+<head>
+<title>testing JSON response</title>
+</head>
+<body>
+<div>
+{% for d in data %}
+    {{ d.name}}<br>
+    {{ d.postcode}}<br>
+{% empty %}
+    Nothing found
+{% endfor %}
+</div>
+</body>
+</html>
