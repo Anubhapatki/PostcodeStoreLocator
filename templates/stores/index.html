@@ -1,15 +1,8 @@
-<html>
-<head>
-<title>testing JSON response</title>
-</head>
-<body>
-<div>
-{% for d in data %}
-    {{ d.name}}<br>
-    {{ d.postcode}}<br>
-{% empty %}
-    Nothing found
-{% endfor %}
-</div>
-</body>
-</html>
+<ul>
+   {% for store in Stores %}
+        <li><b>{{ store.location }}:</b> </li>
+        <li>Postcode:{{ store.postcode }}: </li>
+        <li>Latitude:{{ store.latitude }}: </li>
+        <li>Longitude:{{ store.longitude }}: </li>
+   {% endfor %}
+</ul>
