@@ -1,11 +1,17 @@
 from django.test import TestCase
+from haversine import haversine
 
 # Create your tests here.
 import unittest
 
 class TestStringMethods(unittest.TestCase):
 
-    def test_upper(self):
+    def test_haversine(self):
+        log1 = -0.91299
+        lat1 = 51.426152
+        log2 = -1.01418
+        lat2 = 51.46133
+        print (haversine((lat1,log1),(lat2,log2), unit='km'))
         self.assertEqual('foo'.upper(), 'FOO')
 
     def test_isupper(self):
