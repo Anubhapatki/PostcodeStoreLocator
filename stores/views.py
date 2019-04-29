@@ -3,11 +3,9 @@ from .models import Stores
 from rest_framework.views import  APIView
 from .serializers import StoresSerializer
 from rest_framework.response import Response
-from rest_framework import status
-from django.db.models import Q
 from math import radians,sin, cos, asin, sqrt, atan2
 import requests
-from haversine import haversine
+
 
 import json
 from operator import itemgetter
@@ -16,7 +14,6 @@ from operator import itemgetter
 class StoreLocation(APIView):
 
     def get(self,request, format=None):
-
 
         stores=Stores.objects.all().order_by('location')
         serializer = StoresSerializer(stores, many=True)
@@ -29,11 +26,7 @@ class NearestStoresToLocation(APIView):
 
         (nearest_locations,error)=getPostCodesInRadius(postcode,distance)
         serializer = StoresSerializer(nearest_locations, many=True)
-
         return  Response(serializer.data)
-       # else:
-       #     return Response(serializer.errors,
-       #                     status=status.HTTP_400_BAD_REQUEST)
 
 
 def index(request):
