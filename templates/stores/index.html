@@ -1,8 +1,10 @@
+<h1>Store Locations</h1>
+
 <ul>
    {% for store in Stores %}
-        <li><b>{{ store.location }}:</b> </li>
-        <li>Postcode:{{ store.postcode }}: </li>
-        <li>Latitude:{{ store.latitude }}: </li>
-        <li>Longitude:{{ store.longitude }}: </li>
+        <h3><b>{{ store.location }}</b></h3>
+        <li>Postcode:{{ store.postcode }} </li>
+        <li>Latitude:{{ store.latitude }} </li>
+        <li>Longitude:{{ store.longitude }} </li>
    {% endfor %}
 </ul>

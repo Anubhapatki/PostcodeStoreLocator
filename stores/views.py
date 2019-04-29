@@ -3,13 +3,15 @@ from .models import Stores
 from rest_framework.views import  APIView
 from .serializers import StoresSerializer
 from rest_framework.response import Response
+from rest_framework import status
 from django.db.models import Q
-import math
+from math import radians,sin, cos, asin, sqrt, atan2
 import requests
 from haversine import haversine
 
 import json
 from operator import itemgetter
+
 
 class StoreLocation(APIView):
 
@@ -25,9 +27,13 @@ class NearestStoresToLocation(APIView):
 
     def get(self,request,postcode, distance):
 
-        nearest_locations=getPostCodesInRadius(postcode,distance)
+        (nearest_locations,error)=getPostCodesInRadius(postcode,distance)
         serializer = StoresSerializer(nearest_locations, many=True)
+
         return  Response(serializer.data)
+       # else:
+       #     return Response(serializer.errors,
+       #                     status=status.HTTP_400_BAD_REQUEST)
 
 
 def index(request):
@@ -71,10 +77,15 @@ def getPostCodesInRadius(postcode, distance):
     #Find longitude and latitude of a given postcode
     response = requests.get('https://api.postcodes.io/postcodes/{}'.format(postcode))
     response_json = json.loads(response.text)
+    print (response.status_code, response)
+    if response.status_code != 200:
+        return None, response_json["error"]
 
-
-    postcode_latitude = response_json["result"]["latitude"]
-    postcode_longitude = response_json["result"]["longitude"]
+    try:
+        postcode_latitude = response_json["result"]["latitude"]
+        postcode_longitude = response_json["result"]["longitude"]
+    except:
+        return (None, response.text)
 
 
     if postcode_latitude and postcode_longitude:
@@ -107,11 +118,12 @@ def getPostCodesInRadius(postcode, distance):
 
         queryset = Stores.objects.filter(latitude__gte=lat1, latitude__lte=lat2) \
             .filter(longitude__gte=long1, longitude__lte=long2)
+    
+        queryset = Stores.objects.filter(
+            Q(latitude__range = (lat2, round(lat,5)))
+           & Q(longitude__range=(long2, round(lon,5)))
+        )
         """
-        #queryset = Stores.objects.filter(
-         #   Q(latitude__range = (lat2, round(lat,5)))
-           #& Q(longitude__range=(long2, round(lon,5)))
-        #)
         locations=list()
         queryset = Stores.objects.all().order_by('-latitude')
         for store in queryset:
@@ -119,8 +131,7 @@ def getPostCodesInRadius(postcode, distance):
             long2=store.longitude
 
             if long2 and lat2:
-
-                radius = haversine((lat,lon),(lat2,long2))
+                radius = haversine_distance((lat,lon),(lat2,long2))
                 if radius <= distance:
                     locations.append(store)
 
@@ -128,6 +139,30 @@ def getPostCodesInRadius(postcode, distance):
 
         print ([q.location for q in queryset])
 
-    return locations
+    return (locations,None)
+
+
+
+def haversine_distance(point1, point2):
+    AVG_EARTH_RADIUS_KM = 6371.0088
+    # get earth radius in required units
+    avg_earth_radius = AVG_EARTH_RADIUS_KM
+
+    # unpack latitude/longitude
+    lat1, lng1 = point1
+    lat2, lng2 = point2
+
+    # convert all latitudes/longitudes from decimal degrees to radians
+    lat1, lng1, lat2, lng2 = map(radians, (lat1, lng1, lat2, lng2))
+
+    # calculate haversine
+    lat = lat2 - lat1
+    lng = lng2 - lng1
+    d = sin(lat * 0.5) ** 2 + cos(lat1) * cos(lat2) * sin(lng * 0.5) ** 2
+    c = 2 * atan2(sqrt(d),sqrt(1-d))
+
+    #return 2 * avg_earth_radius * asin(sqrt(d))
+    return AVG_EARTH_RADIUS_KM * c
+
 
 

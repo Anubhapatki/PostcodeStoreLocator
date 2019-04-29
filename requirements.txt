@@ -1,3 +1,3 @@
-django
-django-rest-framework
-requests
+django==2.2
+django-rest-framework==3.9.2
+requests==2.21.0
